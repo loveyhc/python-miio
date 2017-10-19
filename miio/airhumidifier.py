@@ -20,7 +20,7 @@ class LedBrightness(enum.Enum):
 
 
 class AirHumidifier(Device):
-    """Main class representing the air humidifier."""
+    """Implementation of Xiaomi Mi Air Humidifier."""
 
     def status(self):
         """Retrieve properties."""
@@ -83,36 +83,44 @@ class AirHumidifierStatus:
 
     @property
     def power(self) -> str:
+        """Power state."""
         return self.data["power"]
 
     @property
     def is_on(self) -> bool:
+        """True if device is turned on."""
         return self.power == "on"
 
     @property
     def mode(self) -> OperationMode:
+        """Operation mode."""
         return OperationMode(self.data["mode"])
 
     @property
     def temperature(self) -> Optional[float]:
+        """Current temperature, if available."""
         if self.data["temp_dec"] is not None:
             return self.data["temp_dec"] / 10.0
         return None
 
     @property
     def humidity(self) -> int:
+        """Current humidity."""
         return self.data["humidity"]
 
     @property
     def buzzer(self) -> bool:
+        """True if buzzer is turned on."""
         return self.data["buzzer"] == "on"
 
     @property
     def led(self) -> bool:
+        """True if LED is turned on."""
         return self.data["led"] == "on"
 
     @property
     def led_brightness(self) -> Optional[LedBrightness]:
+        """LED brightness."""
         if self.data["led_b"] is not None:
             return LedBrightness(self.data["led_b"])
         return None

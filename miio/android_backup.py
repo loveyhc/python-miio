@@ -30,17 +30,28 @@ class EncryptionType(enum.Enum):
 
 
 class AndroidBackup:
+    """A class to handle Android backups.
+    This is based on the original code of Bluec0re available at
+    https://github.com/bluec0re/android-backup-tools
+    """
     def __init__(self, fname=None):
+        """Initializes AndroidBackup.
+        If `fname` is given, the file will be opened for reading in binary mode.
+
+        :param str fname: Archive to open"""
         if fname:
             self.open(fname)
 
     def open(self, fname, mode='rb'):
+        """Open the file for reading."""
         self.fp = open(fname, mode)
 
     def close(self):
+        """Close the file."""
         self.fp.close()
 
     def parse(self):
+        """Parse the backup header for version, compression and encryption."""
         self.fp.seek(0)
         magic = self.fp.readline()
         assert magic == b'ANDROID BACKUP\n'
@@ -49,9 +60,11 @@ class AndroidBackup:
         self.encryption = EncryptionType(self.fp.readline().strip().decode())
 
     def is_encrypted(self):
+        """Return True if the file is encrypted with AES256."""
         return self.encryption == EncryptionType.AES256
 
     def _decrypt(self, enc, password):
+        """Decrypt the given content `enc` with password `password`."""
         if AES is None:
             raise ImportError("PyCrypto required")
 
@@ -99,6 +112,7 @@ class AndroidBackup:
 
     @staticmethod
     def encode_utf8(mk):
+        """Encode to utf8."""
         utf8mk = mk.decode('raw_unicode_escape')
         utf8mk = list(utf8mk)
         for i in range(len(utf8mk)):
@@ -110,6 +124,7 @@ class AndroidBackup:
         return ''.join(utf8mk).encode('utf-8')
 
     def _encrypt(self, dec, password):
+        """Encrypt the given content with a given password."""
         if AES is None:
             raise ImportError("PyCrypto required")
 
@@ -163,6 +178,7 @@ class AndroidBackup:
         return tar
 
     def unpack(self, target_dir=None, password=None):
+        """Unpacks the given file into the `target_dir`."""
         tar = self.read_data(password)
 
         members = tar.getmembers()
@@ -179,10 +195,12 @@ class AndroidBackup:
             pickle.dump(members, fp)
 
     def list(self, password=None):
+        """List contents of the backup file."""
         tar = self.read_tar(password)
         return tar.list()
 
     def pack(self, fname, password=None):
+        """Pack given directory `fname`, and encrypt with `password` if given."""
         target_dir = os.path.basename(fname) + '_unpacked'
         pickle_fname = os.path.basename(fname) + '.pickle'
 

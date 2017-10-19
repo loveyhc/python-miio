@@ -21,7 +21,7 @@ class PlugV1(Device):
         """Power off."""
         return self.send("set_usb_off", [])
 
-    def status(self):
+    def status(self) -> PlugV1Status:
         """Retrieve properties."""
         properties = ['on', 'usb_on']
         values = self.send(
@@ -38,14 +38,17 @@ class PlugV1Status:
 
     @property
     def power(self) -> bool:
+        """Current power state."""
         return self.data["on"]
 
     @property
     def is_on(self) -> bool:
+        """True if device is on."""
         return self.power
 
     @property
     def usb_power(self) -> bool:
+        """True if USB is on."""
         return self.data["usb_on"]
 
     def __str__(self) -> str:
